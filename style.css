@@ -1,0 +1,162 @@
+:root {
+  color-scheme: light;
+  font-family: "Segoe UI", Arial, sans-serif;
+  color: #233148;
+  background: #f5f8fc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --color-ink: #233148;
+  --color-muted: #68778c;
+  --color-accent: #4278d7;
+  --color-ground: #9aa9bb;
+  --color-panel: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 280px;
+  min-height: 100vh;
+  margin: 0;
+  display: grid;
+  place-items: center;
+  padding: 32px 18px;
+}
+
+.page {
+  width: min(100%, 760px);
+}
+
+.page-header {
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+h1 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  line-height: 1.15;
+}
+
+.instructions {
+  margin: 12px 0 0;
+  color: var(--color-muted);
+  font-size: 1rem;
+}
+
+.game-panel {
+  overflow: hidden;
+  border: 1px solid #e4eaf2;
+  border-radius: 16px;
+  background: var(--color-panel);
+  box-shadow: 0 16px 40px rgb(35 49 72 / 8%);
+}
+
+.game-status {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 22px;
+}
+
+.status-label {
+  color: var(--color-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.score {
+  color: var(--color-ink);
+  font-family: "Courier New", monospace;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.game-area {
+  position: relative;
+  height: clamp(190px, 42vw, 260px);
+  overflow: hidden;
+  background: linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%);
+}
+
+.player {
+  position: absolute;
+  z-index: 1;
+  bottom: 30px;
+  left: 10%;
+  width: 34px;
+  height: 42px;
+  border: 3px solid #315fb1;
+  border-radius: 10px 10px 6px 6px;
+  background: var(--color-accent);
+}
+
+.player::after {
+  position: absolute;
+  top: 9px;
+  right: 6px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #ffffff;
+  content: "";
+}
+
+.obstacles {
+  position: absolute;
+  inset: 0;
+}
+
+.obstacle {
+  position: absolute;
+  right: 13%;
+  bottom: 30px;
+  width: 20px;
+  height: 32px;
+  border: 3px solid #b75a46;
+  border-radius: 5px 5px 2px 2px;
+  background: #e27a60;
+}
+
+.ground {
+  position: absolute;
+  right: 0;
+  bottom: 24px;
+  left: 0;
+  height: 2px;
+  background: var(--color-ground);
+}
+
+.game-caption {
+  margin: 0;
+  padding: 14px 20px 17px;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  text-align: center;
+}
+
+@media (max-width: 420px) {
+  body {
+    padding: 24px 12px;
+  }
+
+  .page-header {
+    margin-bottom: 22px;
+  }
+
+  .player {
+    left: 8%;
+  }
+
+  .obstacle {
+    right: 10%;
+  }
+}
