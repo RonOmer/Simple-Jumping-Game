@@ -1,181 +1,154 @@
 "use strict";
-// Select the HTML elements used by the game.
+
 const gameElements = {
   area: document.querySelector("#game-area"),
   player: document.querySelector("#player"),
   obstacles: document.querySelector("#obstacles"),
   ground: document.querySelector("#ground"),
   scoreDisplay: document.querySelector("#score-display"),
+  caption: document.querySelector(".game-caption"),
 };
-// Store the current state of the game.
+
 const gameState = {
   isRunning: false,
   isGameOver: false,
   score: 0,
 };
-// Store the player's movement and jumping information.
+
 const playerState = {
-  positionY: 0,       // Current vertical position of the player.
-  velocityY: 0,       // Current vertical speed.
-  jumpStrength: 12,   // Strength of the jump.
-  gravity: 0.6,       // Gravity pulls the player downward.
-  isJumping: false,   // True while the player is in the air.
+  positionY: 0,
+  velocityY: 0,
+  jumpStrength: 12,
+  gravity: 0.6,
+  isJumping: false,
 };
-// Store the keyboard input state.
+
 const keys = {
   left: false,
   right: false,
 };
-// Movement settings.
+
 const movement = {
   speed: 5,
 };
 
-// Obstacle settings
 const obstacleSettings = {
   speed: 220,
   interval: 1600,
   elapsedTime: 0,
   lastFrameTime: null,
+  minHeight: 20,
+  maxHeight: 40,
 };
 
-
-// Check that the required HTML elements exist before starting.
-if (
-  gameElements.area &&
-  gameElements.player &&
-  gameElements.obstacles &&
-  gameElements.ground &&
-  gameElements.scoreDisplay
-) {
+if (gameElements.area && gameElements.player && gameElements.obstacles && 
+    gameElements.ground && gameElements.scoreDisplay) {
   initialiseGame();
-} else {
-  console.error(
-    "Game could not start. Please check the element IDs in index.html."
-  );
 }
-// Set up the game and keyboard controls.
+
 function initialiseGame() {
-  // Start the game when the player presses a movement key.
   document.addEventListener("keydown", handleKeyDown);
-  // Stop movement when the player releases a key.
   document.addEventListener("keyup", handleKeyUp);
-  // Prevent the page from scrolling when Space is pressed.
   window.addEventListener("keydown", (event) => {
     if (event.code === "Space") {
       event.preventDefault();
     }
   });
-  // Display the initial score.
   updateScoreDisplay();
-  // Draw the player at the starting position.
   updatePlayerPosition();
 }
-// Handle keys pressed by the player.
+
 function handleKeyDown(event) {
-  // Start the game when a movement key is pressed.
   if (!gameState.isRunning && !gameState.isGameOver) {
     gameState.isRunning = true;
     requestAnimationFrame(gameLoop);
   }
-  // Move the player to the left.
+
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
     keys.left = true;
   }
-  // Move the player to the right.
+
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
     keys.right = true;
   }
-  // Jump when Space or the Up Arrow is pressed.
-  if (
-    event.code === "Space" ||
-    event.key === "ArrowUp"
-  ) {
+
+  if (event.code === "Space" || event.key === "ArrowUp") {
     jump();
   }
 }
-// Handle keys released by the player.
+
 function handleKeyUp(event) {
-  // Stop moving left when the key is released.
   if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
     keys.left = false;
   }
-  // Stop moving right when the key is released.
+
   if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
     keys.right = false;
   }
 }
-// Make the player jump.
+
 function jump() {
-  // Allow jumping only when the player is on the ground.
   if (!playerState.isJumping && !gameState.isGameOver) {
     playerState.velocityY = playerState.jumpStrength;
     playerState.isJumping = true;
   }
 }
-// Update the player's horizontal position.
+
 function movePlayer() {
   const areaWidth = gameElements.area.clientWidth;
   const playerWidth = gameElements.player.offsetWidth;
-  // Read the player's current horizontal position.
   let positionX = gameElements.player.offsetLeft;
-  // Move left when the left key is pressed.
+
   if (keys.left) {
     positionX -= movement.speed;
   }
-  // Move right when the right key is pressed.
+
   if (keys.right) {
     positionX += movement.speed;
   }
-  // Keep the player inside the game area.
-  positionX = Math.max(
-    0,
-    Math.min(positionX, areaWidth - playerWidth)
-  );
-  // Apply the new horizontal position.
+
+  positionX = Math.max(0, Math.min(positionX, areaWidth - playerWidth));
   gameElements.player.style.left = `${positionX}px`;
 }
-// Apply gravity and update the player's vertical position.
+
 function applyGravity() {
-  // Gravity gradually reduces the upward velocity.
   playerState.velocityY -= playerState.gravity;
-  // Update the player's vertical position.
   playerState.positionY += playerState.velocityY;
-  // Stop the player from falling through the ground.
+
   if (playerState.positionY <= 0) {
     playerState.positionY = 0;
     playerState.velocityY = 0;
     playerState.isJumping = false;
   }
-  // Update the player's position on the screen.
+
   updatePlayerPosition();
 }
-// Update the player's visual vertical position.
+
 function updatePlayerPosition() {
-  // The player starts at the bottom of the game area.
-  // A positive positionY moves the player upward.
-  gameElements.player.style.bottom =
-    `${30 + playerState.positionY}px`;
-}
-// Update the score shown in the HTML.
-function updateScoreDisplay() {
-  // Display the score as five digits, for example 00000.
-  gameElements.scoreDisplay.value =
-    String(gameState.score).padStart(5, "0");
+  gameElements.player.style.bottom = `${30 + playerState.positionY}px`;
 }
 
-// Create a new obstacle
+function updateScoreDisplay() {
+  gameElements.scoreDisplay.value = String(gameState.score).padStart(5, "0");
+}
+
+function getRandomHeight() {
+  return Math.floor(Math.random() * (obstacleSettings.maxHeight - obstacleSettings.minHeight + 1)) + obstacleSettings.minHeight;
+}
+
 function createObstacle() {
   const obstacle = document.createElement("div");
-
   obstacle.classList.add("obstacle");
+  
+  const height = getRandomHeight();
+  obstacle.style.height = `${height}px`;
   obstacle.style.right = "auto";
   obstacle.style.left = `${gameElements.area.clientWidth}px`;
+  obstacle.style.bottom = "30px";
 
   gameElements.obstacles.appendChild(obstacle);
 }
 
-// Generate obstacles at regular intervals
 function generateObstacles(deltaTime) {
   obstacleSettings.elapsedTime += deltaTime;
 
@@ -185,20 +158,17 @@ function generateObstacles(deltaTime) {
   }
 }
 
-// Move obstacles from right to left
 function moveObstacles(deltaTime) {
   const obstacles = gameElements.obstacles.children;
   const distance = obstacleSettings.speed * deltaTime / 1000;
 
   for (const obstacle of obstacles) {
     let positionX = parseFloat(obstacle.style.left);
-
     positionX -= distance;
     obstacle.style.left = `${positionX}px`;
   }
 }
 
-// Remove obstacles that leave the game area
 function removeObstacles() {
   const obstacles = gameElements.obstacles.children;
 
@@ -211,7 +181,6 @@ function removeObstacles() {
   }
 }
 
-// Check collision between player and one obstacle
 function isColliding(obstacle) {
   const playerRect = gameElements.player.getBoundingClientRect();
   const obstacleRect = obstacle.getBoundingClientRect();
@@ -224,7 +193,6 @@ function isColliding(obstacle) {
   );
 }
 
-// Check all obstacles for collisions
 function checkCollisions() {
   const obstacles = gameElements.obstacles.children;
 
@@ -236,29 +204,49 @@ function checkCollisions() {
   }
 }
 
-// Stop the game and display the final score
 function endGame() {
   gameState.isRunning = false;
   gameState.isGameOver = true;
-
   keys.left = false;
   keys.right = false;
 
-  const caption = document.querySelector(".game-caption");
-
-  caption.textContent =
-    `Game Over! Final Score: ${gameState.score}`;
+  gameElements.caption.textContent = `Game Over! Final Score: ${gameState.score}`;
+  gameElements.caption.style.color = "#e27a60";
+  gameElements.caption.style.fontWeight = "bold";
 }
 
+function resetGame() {
+  gameState.isRunning = false;
+  gameState.isGameOver = false;
+  gameState.score = 0;
+  playerState.positionY = 0;
+  playerState.velocityY = 0;
+  playerState.isJumping = false;
+  obstacleSettings.elapsedTime = 0;
+  obstacleSettings.lastFrameTime = null;
+  keys.left = false;
+  keys.right = false;
 
-// Main game loop: update movement and jumping continuously.
+  gameElements.obstacles.innerHTML = "";
+  updateScoreDisplay();
+  updatePlayerPosition();
+  gameElements.caption.textContent = "Get ready to run!";
+  gameElements.caption.style.color = "";
+  gameElements.caption.style.fontWeight = "";
+}
+
+document.addEventListener("keydown", (event) => {
+  if (gameState.isGameOver && event.key === " ") {
+    resetGame();
+    event.preventDefault();
+  }
+});
+
 function gameLoop(timestamp) {
-  // Stop updating if the game is not running.
   if (!gameState.isRunning || gameState.isGameOver) {
     return;
   }
 
-  
   if (obstacleSettings.lastFrameTime === null) {
     obstacleSettings.lastFrameTime = timestamp;
   }
@@ -266,23 +254,14 @@ function gameLoop(timestamp) {
   const deltaTime = timestamp - obstacleSettings.lastFrameTime;
   obstacleSettings.lastFrameTime = timestamp;
 
-
-  // Update horizontal movement.
   movePlayer();
-  // Update jumping and gravity.
   applyGravity();
-
   generateObstacles(deltaTime);
   moveObstacles(deltaTime);
   removeObstacles();
   checkCollisions();
 
-  // Continue the game on the next animation frame.
-  // requestAnimationFrame(gameLoop);
-
-  // Continue the game on the next animation frame if the game is still running.
   if (gameState.isRunning) {
     requestAnimationFrame(gameLoop);
   }
-
 }
