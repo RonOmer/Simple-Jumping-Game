@@ -30,6 +30,16 @@ const keys = {
 const movement = {
   speed: 5,
 };
+
+// Obstacle settings
+const obstacleSettings = {
+  speed: 220,
+  interval: 1600,
+  elapsedTime: 0,
+  lastFrameTime: null,
+};
+
+
 // Check that the required HTML elements exist before starting.
 if (
   gameElements.area &&
@@ -153,16 +163,126 @@ function updateScoreDisplay() {
   gameElements.scoreDisplay.value =
     String(gameState.score).padStart(5, "0");
 }
+
+// Create a new obstacle
+function createObstacle() {
+  const obstacle = document.createElement("div");
+
+  obstacle.classList.add("obstacle");
+  obstacle.style.right = "auto";
+  obstacle.style.left = `${gameElements.area.clientWidth}px`;
+
+  gameElements.obstacles.appendChild(obstacle);
+}
+
+// Generate obstacles at regular intervals
+function generateObstacles(deltaTime) {
+  obstacleSettings.elapsedTime += deltaTime;
+
+  if (obstacleSettings.elapsedTime >= obstacleSettings.interval) {
+    createObstacle();
+    obstacleSettings.elapsedTime = 0;
+  }
+}
+
+// Move obstacles from right to left
+function moveObstacles(deltaTime) {
+  const obstacles = gameElements.obstacles.children;
+  const distance = obstacleSettings.speed * deltaTime / 1000;
+
+  for (const obstacle of obstacles) {
+    let positionX = parseFloat(obstacle.style.left);
+
+    positionX -= distance;
+    obstacle.style.left = `${positionX}px`;
+  }
+}
+
+// Remove obstacles that leave the game area
+function removeObstacles() {
+  const obstacles = gameElements.obstacles.children;
+
+  for (const obstacle of Array.from(obstacles)) {
+    if (obstacle.offsetLeft + obstacle.offsetWidth < 0) {
+      obstacle.remove();
+      gameState.score++;
+      updateScoreDisplay();
+    }
+  }
+}
+
+// Check collision between player and one obstacle
+function isColliding(obstacle) {
+  const playerRect = gameElements.player.getBoundingClientRect();
+  const obstacleRect = obstacle.getBoundingClientRect();
+
+  return (
+    playerRect.left < obstacleRect.right &&
+    playerRect.right > obstacleRect.left &&
+    playerRect.top < obstacleRect.bottom &&
+    playerRect.bottom > obstacleRect.top
+  );
+}
+
+// Check all obstacles for collisions
+function checkCollisions() {
+  const obstacles = gameElements.obstacles.children;
+
+  for (const obstacle of obstacles) {
+    if (isColliding(obstacle)) {
+      endGame();
+      return;
+    }
+  }
+}
+
+// Stop the game and display the final score
+function endGame() {
+  gameState.isRunning = false;
+  gameState.isGameOver = true;
+
+  keys.left = false;
+  keys.right = false;
+
+  const caption = document.querySelector(".game-caption");
+
+  caption.textContent =
+    `Game Over! Final Score: ${gameState.score}`;
+}
+
+
 // Main game loop: update movement and jumping continuously.
-function gameLoop() {
+function gameLoop(timestamp) {
   // Stop updating if the game is not running.
   if (!gameState.isRunning || gameState.isGameOver) {
     return;
   }
+
+  
+  if (obstacleSettings.lastFrameTime === null) {
+    obstacleSettings.lastFrameTime = timestamp;
+  }
+
+  const deltaTime = timestamp - obstacleSettings.lastFrameTime;
+  obstacleSettings.lastFrameTime = timestamp;
+
+
   // Update horizontal movement.
   movePlayer();
   // Update jumping and gravity.
   applyGravity();
+
+  generateObstacles(deltaTime);
+  moveObstacles(deltaTime);
+  removeObstacles();
+  checkCollisions();
+
   // Continue the game on the next animation frame.
-  requestAnimationFrame(gameLoop);
+  // requestAnimationFrame(gameLoop);
+
+  // Continue the game on the next animation frame if the game is still running.
+  if (gameState.isRunning) {
+    requestAnimationFrame(gameLoop);
+  }
+
 }

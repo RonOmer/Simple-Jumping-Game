@@ -111,9 +111,10 @@ h1 {
 }
 
 .obstacles {
-  position: absolute;
-  inset: 0;
-}
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
 
 .obstacle {
   position: absolute;
