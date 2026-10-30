@@ -13,40 +13,43 @@ const gameState = {
   isGameOver: false,
   score: 0,
 };
-// Store the player's movement information.
+// Store the player's movement and jumping information.
 const playerState = {
-  x: 30,             // Horizontal position of the player.
-  y: 0,              // Vertical position above the ground.
-  velocityY: 0,      // Vertical speed during a jump or fall.
-  speed: 5,           // Horizontal movement speed.
-  jumpStrength: 12,   // Initial upward speed when jumping.
-  gravity: 0.6,       // Force that pulls the player downward.
-  isJumping: false,   // Prevents the player from jumping repeatedly in mid-air.
+  x: 0,                // Horizontal position of the player.
+  y: 0,                // Height above the ground.
+  velocityY: 0,        // Vertical speed.
+  speed: 5,            // Horizontal movement speed.
+  jumpStrength: 12,    // Initial upward speed when jumping.
+  gravity: 0.6,        // Force pulling the player downward.
+  isJumping: false,    // Tracks whether the player is in the air.
 };
-// Track which movement keys are currently pressed.
+// Store the keyboard controls currently being pressed.
 const keys = {
   left: false,
   right: false,
 };
-// Listen for keys being pressed.
+// The ground is positioned 24px above the bottom of the game area.
+const GROUND_HEIGHT = 24;
+// Listen for keyboard input.
 document.addEventListener("keydown", (event) => {
   // Prevent the arrow keys and spacebar from scrolling the page.
   if (
     event.code === "ArrowLeft" ||
     event.code === "ArrowRight" ||
+    event.code === "ArrowUp" ||
     event.code === "Space"
   ) {
     event.preventDefault();
   }
-  // Move left with the left arrow or A key.
+  // Move left using the left arrow or A key.
   if (event.code === "ArrowLeft" || event.code === "KeyA") {
     keys.left = true;
   }
-  // Move right with the right arrow or D key.
+  // Move right using the right arrow or D key.
   if (event.code === "ArrowRight" || event.code === "KeyD") {
     keys.right = true;
   }
-  // Jump with the spacebar or up arrow.
+  // Jump using the spacebar or up arrow.
   if (
     (event.code === "Space" || event.code === "ArrowUp") &&
     !playerState.isJumping
@@ -55,7 +58,7 @@ document.addEventListener("keydown", (event) => {
     playerState.isJumping = true;
   }
 });
-// Listen for keys being released.
+// Detect when movement keys are released.
 document.addEventListener("keyup", (event) => {
   if (event.code === "ArrowLeft" || event.code === "KeyA") {
     keys.left = false;
@@ -64,55 +67,65 @@ document.addEventListener("keyup", (event) => {
     keys.right = false;
   }
 });
-// Update the player's position and apply gravity.
+// Update the player's horizontal and vertical position.
 function updatePlayer() {
-  // Move the player horizontally according to the pressed keys.
+  // Move the player horizontally.
   if (keys.left) {
     playerState.x -= playerState.speed;
   }
   if (keys.right) {
     playerState.x += playerState.speed;
   }
-  // Keep the player inside the game area.
-  const maxX = gameElements.area.clientWidth - gameElements.player.offsetWidth;
+  // Prevent the player from leaving the game area.
+  const maxX =
+    gameElements.area.clientWidth - gameElements.player.offsetWidth;
   playerState.x = Math.max(0, Math.min(playerState.x, maxX));
-  // Apply gravity by reducing the upward velocity over time.
+  // Apply gravity while the player is jumping or falling.
   playerState.velocityY -= playerState.gravity;
-  // Update the player's vertical position.
+  // Update the player's height.
   playerState.y += playerState.velocityY;
-  // Stop the player from falling through the ground.
+  // Keep the player on the ground when the jump ends.
   if (playerState.y <= 0) {
     playerState.y = 0;
     playerState.velocityY = 0;
     playerState.isJumping = false;
   }
-  // Apply the calculated position to the player's HTML element.
+  // Update the player's position on the screen.
   gameElements.player.style.left = `${playerState.x}px`;
-  gameElements.player.style.bottom = `${playerState.y}px`;
+  // Keep the player's feet above the ground line.
+  gameElements.player.style.bottom =
+    `${GROUND_HEIGHT + playerState.y}px`;
 }
-// Run the movement update repeatedly for smooth animation.
+// Run the game animation continuously.
 function gameLoop() {
   updatePlayer();
+  // Request the next animation frame.
   requestAnimationFrame(gameLoop);
 }
-// Set up the player's initial position and start the animation.
+// Initialize the player's starting position and start animation.
 function startGame() {
-  // Ensure the game area and player exist before starting.
+  // Check that the required HTML elements exist.
   if (!gameElements.area || !gameElements.player) {
     console.error("The game area or player element could not be found.");
     return;
   }
-  // Position the player at the starting point.
+  // Set the player's initial horizontal position.
+  playerState.x = gameElements.area.clientWidth * 0.1;
+  // Reset the player's jumping state.
+  playerState.y = 0;
+  playerState.velocityY = 0;
+  playerState.isJumping = false;
+  // Position the player relative to the game area.
   gameElements.player.style.position = "absolute";
   gameElements.player.style.left = `${playerState.x}px`;
-  gameElements.player.style.bottom = "0px";
-  // Start the game loop only once.
+  gameElements.player.style.bottom = `${GROUND_HEIGHT}px`;
+  // Start the animation loop only once.
   if (!gameState.isRunning) {
     gameState.isRunning = true;
     gameLoop();
   }
 }
-// Start the game after the HTML document has loaded.
+// Start after the HTML document has loaded.
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", startGame);
 } else {
