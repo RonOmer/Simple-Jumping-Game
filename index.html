@@ -3,16 +3,16 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#f5f8fc">
-    <title>Simple Jumping Game</title>
+    <meta name="theme-color" content="#1a0a2e">
+    <title>Branko-jumping Game</title>
     <link rel="stylesheet" href="style.css">
     <script src="script.js" defer></script>
   </head>
   <body>
     <main class="page">
       <header class="page-header">
-        <h1>Simple Jumping Game</h1>
-        <p class="instructions">Space or ↑ to Jump | ← → or A/D to Move</p>
+        <h1>Branko-jumping Game</h1>
+        <p class="instructions">Space or ↑ to Jump | ← → to Move</p>
       </header>
 
       <section class="game-panel" aria-label="Game">
@@ -22,6 +22,7 @@
         </div>
 
         <div id="game-area" class="game-area" aria-label="Game play area">
+          <div id="clouds" class="clouds"></div>
           <div
             id="player"
             class="player"
@@ -29,11 +30,11 @@
             aria-label="Player character"
           ></div>
           <div id="obstacles" class="obstacles" aria-hidden="true">
-            <!-- <div class="obstacle"></div> -->
           </div>
           <div id="ground" class="ground" aria-hidden="true"></div>
+          <div id="ground-tiles" class="ground-tiles" aria-hidden="true"></div>
         </div>
-        <p class="game-caption">Get ready to run!</p>
+        <p class="game-caption">Start going forward, but be careful! The monsters are coming!</p>
       </section>
     </main>
   </body>

@@ -1,15 +1,16 @@
 :root {
-  color-scheme: light;
+  color-scheme: dark;
   font-family: "Segoe UI", Arial, sans-serif;
-  color: #233148;
-  background: #f5f8fc;
+  color: #e0d5ff;
+  background: #0f051a;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
-  --color-ink: #233148;
-  --color-muted: #68778c;
-  --color-accent: #4278d7;
-  --color-ground: #9aa9bb;
-  --color-panel: #ffffff;
+  --color-ink: #e0d5ff;
+  --color-muted: #9d8cb8;
+  --color-accent: #7c3aed;
+  --color-ground: #2d1b4e;
+  --color-panel: #1a0a2e;
+  --color-monster: #ff4757;
 }
 
 * {
@@ -84,7 +85,9 @@ h1 {
   position: relative;
   height: clamp(190px, 42vw, 260px);
   overflow: hidden;
-  background: linear-gradient(180deg, #f8fbff 0%, #edf4fb 100%);
+  background: linear-gradient(180deg, #0f051a 0%, #1a0d2e 50%, #2d1b4e 100%);
+  border-top: 2px solid var(--color-accent);
+  box-shadow: inset 0 0 30px rgba(124, 58, 237, 0.1);
 }
 
 .player {
@@ -92,22 +95,14 @@ h1 {
   z-index: 1;
   bottom: 30px;
   left: 10%;
-  width: 34px;
+  width: 24px;
   height: 42px;
-  border: 3px solid #315fb1;
-  border-radius: 10px 10px 6px 6px;
-  background: var(--color-accent);
-}
-
-.player::after {
-  position: absolute;
-  top: 9px;
-  right: 6px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: #ffffff;
-  content: "";
+  background-image: url('branko-sprite.png');
+  background-size: 72px 42px;
+  background-position: 0px 0px;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
 }
 
 .obstacles {
@@ -120,11 +115,43 @@ h1 {
   position: absolute;
   right: 13%;
   bottom: 30px;
-  width: 20px;
+  width: 24px;
   height: 32px;
-  border: 3px solid #b75a46;
-  border-radius: 5px 5px 2px 2px;
-  background: #e27a60;
+  background-image: linear-gradient(135deg, var(--color-body) 0%, var(--color-body) 100%);
+  border-radius: 3px 3px 8px 8px;
+  border: 2px solid var(--color-border);
+  box-shadow: 0 0 10px var(--color-glow), inset -1px -1px 3px rgba(0, 0, 0, 0.5);
+  overflow: visible;
+}
+
+.obstacle::before {
+  position: absolute;
+  top: 6px;
+  left: 4px;
+  width: 6px;
+  height: 6px;
+  background: #000;
+  border-radius: 50%;
+  content: "";
+  box-shadow: 10px 0 0 #000;
+}
+
+.obstacle::after {
+  position: absolute;
+  bottom: -4px;
+  left: 4px;
+  width: 16px;
+  height: 6px;
+  background: 
+    radial-gradient(circle at 25% 0%, var(--color-border) 0%, var(--color-border) 40%, transparent 40%),
+    radial-gradient(circle at 75% 0%, var(--color-border) 0%, var(--color-border) 40%, transparent 40%);
+  content: "";
+  animation: monsterWalk 0.6s infinite;
+}
+
+@keyframes monsterWalk {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(2px); }
 }
 
 .ground {
@@ -133,7 +160,25 @@ h1 {
   bottom: 24px;
   left: 0;
   height: 2px;
-  background: var(--color-ground);
+  background: var(--color-accent);
+  box-shadow: 0 0 5px rgba(124, 58, 237, 0.6);
+}
+
+.ground-tiles {
+  position: absolute;
+  bottom: 26px;
+  left: 0;
+  width: 200%;
+  height: 8px;
+  background-image: 
+    linear-gradient(90deg, var(--color-ground) 0%, var(--color-ground) 40%, transparent 40%, transparent 50%, var(--color-ground) 50%, var(--color-ground) 90%, transparent 90%);
+  background-size: 80px 100%;
+  background-position: 0 0;
+}
+
+@keyframes tileScroll {
+  0% { background-position: 0 0; }
+  100% { background-position: 80px 0; }
 }
 
 .game-caption {
@@ -144,6 +189,50 @@ h1 {
   text-align: center;
   min-height: 20px;
   transition: all 0.3s ease;
+}
+
+.clouds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 60%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cloud {
+  position: absolute;
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 100px;
+  opacity: 0.6;
+}
+
+.cloud::before,
+.cloud::after {
+  content: "";
+  position: absolute;
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 100px;
+}
+
+.cloud::before {
+  width: 30px;
+  height: 30px;
+  top: -15px;
+  left: 10px;
+}
+
+.cloud::after {
+  width: 25px;
+  height: 25px;
+  top: -10px;
+  right: 15px;
+}
+
+@keyframes cloudDrift {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100vw); }
 }
 
 @media (max-width: 420px) {
